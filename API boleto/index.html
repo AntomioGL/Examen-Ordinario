@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Boletos</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; }
+    label, select, input, button { margin: 10px 0; display: block; }
+    .resultado { margin-top: 20px; padding: 10px; border: 1px solid #ccc; width: 300px; }
+  </style>
+</head>
+<body>
+  <h1>Precio de Boleto</h1>
+  <form id="boletoForm">
+    <label for="seccion">Sección:</label>
+    <select id="seccion" required>
+      <option value="">Seleccione</option>
+      <option value="A">A - $300</option>
+      <option value="B">B - $490</option>
+      <option value="C">C - $670</option>
+      <option value="D">D - $899</option>
+    </select>
+
+    <label for="dia">Día:</label>
+    <select id="dia" required>
+      <option value="">Seleccione</option>
+      <option value="viernes">Viernes</option>
+      <option value="sábado">Sábado</option>
+      <option value="domingo">Domingo</option>
+    </select>
+
+    <label for="cantidad">Cantidad de boletos:</label>
+    <input type="number" id="cantidad" min="1" value="1" required>
+
+    <button type="submit">Calcular</button>
+  </form>
+
+  <div class="resultado" id="resultado"></div>
+
+  <script>
+    document.getElementById('boletoForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const seccion = document.getElementById('seccion').value;
+      const dia = document.getElementById('dia').value;
+      const cantidad = parseInt(document.getElementById('cantidad').value);
+
+      const res = await fetch('http://localhost:3000/boleto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seccion, dia, cantidad })
+      });
+
+      const data = await res.json();
+
+      const resultadoDiv = document.getElementById('resultado');
+      if (res.ok) {
+        resultadoDiv.innerHTML = `
+          <strong>Resultado:</strong><br>
+          Sección: ${data.seccion}<br>
+          Día: ${data.dia}<br>
+          Precio unitario: $${data.precioUnitario}<br>
+          Cantidad: ${data.cantidad}<br>
+          Total a pagar: <strong>$${data.totalPagar}</strong>
+        `;
+      } else {
+        resultadoDiv.innerHTML = "<strong>Error:</strong> " + data.error;
+      }
+    });
+  </script>
+</body>
+</html>
